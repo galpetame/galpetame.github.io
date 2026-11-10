@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tamerlane Galperin · AI agents that know when to stop</title>
+<meta name="description" content="AI automation portfolio: voice agents, agent verification, a self-blocking market signal machine, and a storefront. Tests, invariants and mutation checks included.">
+<style>
+:root{--bg:#f6f4ef;--ink:#17191c;--mute:#5d646c;--line:#d9d5cb;--card:#fffdf8;--acc:#0b6b5c;--acc2:#b4481e;--code:#12161a;--codeink:#d7e0e6;--ok:#2f9e6b;--bad:#d9534f;--warn:#c98a1b}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1214;--ink:#e9ecee;--mute:#98a2ab;--line:#262c31;--card:#161b1f;--acc:#4fd1b5;--acc2:#f08a5d;--code:#0a0d0f;--codeink:#cfd8de}}
+:root[data-theme=dark]{--bg:#0f1214;--ink:#e9ecee;--mute:#98a2ab;--line:#262c31;--card:#161b1f;--acc:#4fd1b5;--acc2:#f08a5d;--code:#0a0d0f;--codeink:#cfd8de}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Georgia,"Iowan Old Style","Times New Roman",serif}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+h1,h2,h3,.sans,nav,table,figcaption,.k{font-family:ui-sans-serif,system-ui,"Segoe UI",Helvetica,Arial,sans-serif}
+a{color:var(--acc)}
+nav{display:flex;gap:18px;flex-wrap:wrap;align-items:center;padding:18px 0;font-size:14px;border-bottom:1px solid var(--line)}
+nav b{margin-right:auto;font-size:15px}
+nav a{color:var(--mute);text-decoration:none}nav a:hover{color:var(--ink)}
+header{padding:64px 0 40px}
+h1{font-size:clamp(34px,6vw,64px);line-height:1.04;letter-spacing:-.025em;margin:0 0 20px;max-width:15ch}
+h1 em{font-style:normal;color:var(--acc)}
+.lede{font-size:20px;max-width:62ch;color:var(--mute);margin:0 0 26px}
+.cta{display:flex;gap:12px;flex-wrap:wrap}
+.btn{font:600 15px ui-sans-serif,system-ui,sans-serif;padding:11px 18px;border-radius:8px;text-decoration:none;border:1px solid var(--ink);color:var(--ink)}
+.btn.p{background:var(--ink);color:var(--bg)}
+.proof{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);border-radius:12px;background:var(--card);margin:8px 0 56px}
+.proof div{padding:18px 20px;border-right:1px solid var(--line)}.proof div:last-child{border:0}
+.proof strong{display:block;font:700 30px ui-sans-serif,system-ui,sans-serif;letter-spacing:-.02em}
+.proof span{font:13px ui-sans-serif,system-ui,sans-serif;color:var(--mute)}
+section{padding:44px 0;border-top:1px solid var(--line)}
+.k{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc2);font-weight:700}
+h2{font-size:clamp(26px,3.6vw,38px);letter-spacing:-.02em;line-height:1.12;margin:8px 0 14px;max-width:22ch}
+.two{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:36px;align-items:start}
+p{margin:0 0 14px}
+ul.f{list-style:none;padding:0;margin:14px 0}
+ul.f li{padding:9px 0 9px 22px;border-top:1px solid var(--line);position:relative;font-size:16px}
+ul.f li:before{content:"";position:absolute;left:2px;top:19px;width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+.tags span{font:12px ui-sans-serif,system-ui,sans-serif;border:1px solid var(--line);border-radius:99px;padding:3px 10px;color:var(--mute)}
+figure{margin:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+figure img{display:block;width:100%;height:auto}
+figcaption{font-size:13px;color:var(--mute);padding:10px 14px;border-top:1px solid var(--line)}
+pre{margin:0;background:var(--code);color:var(--codeink);font:13px/1.55 ui-monospace,Consolas,Menlo,monospace;padding:16px;overflow-x:auto;border-radius:12px}
+pre .o{color:var(--ok)}pre .b{color:var(--bad)}pre .w{color:var(--warn)}pre .d{color:#7d8891}
+svg{display:block;width:100%;height:auto}
+svg text{font:13px ui-sans-serif,system-ui,sans-serif;fill:var(--ink)}
+svg .n{fill:var(--card);stroke:var(--ink);stroke-width:1.2}
+svg .g{fill:none;stroke:var(--acc);stroke-width:1.6}
+svg .a{stroke:var(--mute);stroke-width:1.3;fill:none;marker-end:url(#ar)}
+svg .s{fill:var(--mute);font-size:11.5px}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-top:1px solid var(--line);vertical-align:top}
+th{color:var(--mute);font-weight:600}
+audio{width:100%;margin:6px 0 2px}
+.note{font:14px ui-sans-serif,system-ui,sans-serif;color:var(--mute);border-left:3px solid var(--acc2);padding:2px 0 2px 12px;margin:14px 0}
+footer{padding:40px 0 70px;border-top:1px solid var(--line);font:14px ui-sans-serif,system-ui,sans-serif;color:var(--mute)}
+@media (max-width:820px){.two{grid-template-columns:1fr}.proof{grid-template-columns:1fr 1fr}.proof div:nth-child(2){border-right:0}.proof div:nth-child(-n+2){border-bottom:1px solid var(--line)}header{padding:40px 0 28px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><b>Tamerlane Galperin</b><a href="#voice">Voice agent</a><a href="#rental">Rental ops</a><a href="#gate">Claim gate</a><a href="#pulse">Signal machine</a><a href="#toys">Storefront</a><a href="#how">How I work</a><a href="https://github.com/galpetame">GitHub</a></nav>
+
+<header>
+<h1>AI agents that know <em>when to stop</em>.</h1>
+<p class="lede">I turn manual business processes into agents and workflows, and I build the checks that decide when an agent may act without a person. Every project below ships with the tests that prove it.</p>
+<div class="cta"><a class="btn p" href="https://github.com/galpetame">See the code</a><a class="btn" href="https://www.linkedin.com/in/tamerlane-galperin-30705939b">LinkedIn</a><a class="btn" href="mailto:galpetame@gmail.com">galpetame@gmail.com</a></div>
+</header>
+
+<div class="proof">
+<div><strong>811</strong><span>automated tests across three repos</span></div>
+<div><strong>35 / 35</strong><span>planted bugs caught by mutation checks</span></div>
+<div><strong>18</strong><span>go-live checks a voice agent must pass</span></div>
+<div><strong>0</strong><span>API keys needed to run any of it</span></div>
+</div>
+
+<section id="voice">
+<div class="k">Case 1 · Voice AI</div>
+<h2>A phone-booking agent that cannot double-book</h2>
+<div class="two">
+<div>
+<p>An intake agent for inbound calls: it qualifies the caller, books a visit and hands the request to a manager or a CRM. The hard part is not the voice. It is what the agent does to the schedule when speech recognition fires twice, a webhook is retried or a write times out.</p>
+<p>So the model never writes. It proposes an action, and a 320-line core decides whether that action is allowed, makes the write idempotent and lets the agent announce only a result it has verified.</p>
+<ul class="f">
+<li>18 go-live checks, each with a deterministic test</li>
+<li>8 safety invariants checked after every step</li>
+<li>300 fuzzed multi-caller sessions with injected backend faults</li>
+<li>12 of 12 planted bugs caught</li>
+</ul>
+<div class="tags"><span>Python</span><span>Asterisk</span><span>streaming STT</span><span>LLM tool calls</span><span>idempotency</span><span>pytest</span></div>
+<p><a href="https://github.com/galpetame/voice-agent-acceptance-tests">github.com/galpetame/voice-agent-acceptance-tests</a></p>
+</div>
+<div>
+<figure>
+<svg viewBox="0 0 600 250" role="img" aria-label="Caller speaks to the model; the model proposes; the booking core decides and writes; uncertain outcomes go to a person">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a939b"/></marker></defs>
+<rect class="n" x="14" y="42" width="92" height="46" rx="23"/><text x="60" y="70" text-anchor="middle">Caller</text>
+<rect class="n" x="150" y="42" width="92" height="46" rx="8"/><text x="196" y="70" text-anchor="middle">LLM</text>
+<rect class="g" x="290" y="30" width="130" height="70" rx="8"/><text x="355" y="61" text-anchor="middle" font-weight="700">Booking core</text><text class="s" x="355" y="80" text-anchor="middle">allowed? idempotent</text>
+<rect class="n" x="468" y="42" width="118" height="46" rx="8"/><text x="527" y="70" text-anchor="middle">Schedule / CRM</text>
+<rect class="n" x="290" y="170" width="130" height="50" rx="8"/><text x="355" y="192" text-anchor="middle">Person</text><text class="s" x="355" y="209" text-anchor="middle">+ hand-off packet</text>
+<path class="a" d="M106 65H148"/><path class="a" d="M242 58H288"/><path class="a" d="M288 76H244"/><path class="a" d="M420 58H466"/><path class="a" d="M466 76H422"/><path class="a" d="M355 100V168"/>
+<text class="s" x="265" y="50" text-anchor="middle">propose</text><text class="s" x="265" y="94" text-anchor="middle">may say</text><text class="s" x="443" y="50" text-anchor="middle">write</text><text class="s" x="443" y="94" text-anchor="middle">result</text><text class="s" x="362" y="140">unknown or half done</text>
+</svg>
+<figcaption>The rule: the model proposes, code decides. Anything uncertain goes to a person with a packet that explains it.</figcaption>
+</figure>
+<p class="sans" style="font-size:14px;margin:16px 0 4px;color:var(--mute)">Voice samples from the Russian-language pilot (synthesised agent voice, 8 kHz telephony profile):</p>
+<audio controls preload="none" src="assets/voice-sample-f.mp3"></audio>
+<audio controls preload="none" src="assets/voice-sample-m.mp3"></audio>
+<p class="sans" style="font-size:14px;margin:18px 0 6px;color:var(--mute)">A scripted call run through the real core, with three faults injected (simulated caller, no audio):</p>
+<pre><span class="d">caller</span>  10 is fine. Actually no, not Tuesday. Thursday.
+<span class="w">core</span>    book(tue-10:00) -> ask_confirmation
+        <span class="d"># stale consent: the old "yes" no longer counts</span>
+<span class="d">caller</span>  Thursday at 10.
+<span class="o">core</span>    book(thu-10:00) -> booked
+        <span class="d"># the write timed out after it happened;
+        # looked up by idempotency key, not retried</span>
+<span class="o">core</span>    book(thu-10:00) again -> booked; visits: 1
+        <span class="d"># STT fired on partial and final transcript</span>
+<span class="d">agent</span>   You are booked for ... <span class="d">[caller barges in]</span>
+<span class="o">core</span>    result still to announce -> booked
+1 visit; invariants held after each of 16 steps</pre>
+<p class="note">Status: prototype. Call flow, qualification and hand-off are designed and tested at the state layer; the agent has not taken live customer calls.</p>
+</div>
+</div>
+</section>
+
+<section id="rental">
+<div class="k">Case 2 · Operations · reference implementation</div>
+<h2>Rental operations run by agents across WhatsApp, Telegram and Slack</h2>
+<div class="two">
+<div>
+<p>A bike rental shop gets the same messages all day: is anything free, I paid the deposit, I am here to pick up, can I extend. Agents can answer them. What they must not do is hand the same bike to two people.</p>
+<p>So the LLM proposes one action per message, and a 180-line fleet core decides: availability, deposits, hand-overs, returns, maintenance. Each message is applied once. What the core cannot settle becomes a ticket routed to the mechanic or the front desk.</p>
+<ul class="f">
+<li>Three n8n workflows: inbound router, daily report, tickets to people</li>
+<li>6 invariants asserted after every message; 53 tests</li>
+<li>The first simulation run broke an invariant: a late return let the next customer take a bike that was still out. Fixed with one rule</li>
+</ul>
+<div class="tw"><table>
+<tr><th colspan="2">Simulated 14-day season, 60 bikes</th></tr>
+<tr><td>Messages</td><td>706</td></tr>
+<tr><td>Handled without a person</td><td>657 (93.1%)</td></tr>
+<tr><td>Sent to a person</td><td>49: unclear 24, hand-over blocked 7, previous customer not back 6, damage 5, extension conflict 4, no license 3</td></tr>
+<tr><td>Invariant violations</td><td>0</td></tr>
+</table></div>
+<div class="tags"><span>n8n</span><span>Python</span><span>WhatsApp</span><span>Telegram</span><span>Slack</span><span>LLM tool calls</span><span>idempotency</span></div>
+<p><a href="https://github.com/galpetame/rental-ops-agents">github.com/galpetame/rental-ops-agents</a></p>
+<p class="note">A reference implementation on a synthetic fleet with generated customers, not a client deployment. The workflows are importable n8n JSON and are tested for wiring; they have not yet run against live messenger accounts.</p>
+</div>
+<div>
+<figure><img src="assets/01_inbound_message_router.svg" alt="n8n workflow: Telegram, WhatsApp and Slack triggers, normalize, LLM proposes an action, fleet core decides, escalation check, reply on the same channel"><figcaption>Workflow 1, inbound router. Orange: triggers. Purple: the LLM. Green: the fleet core. Drawn from the workflow file.</figcaption></figure>
+<figure style="margin-top:14px"><img src="assets/02_daily_ops_report.svg" alt="n8n workflow: daily schedule, fleet core report, format digest, post to Slack, message the owner if bikes are overdue"><figcaption>Workflow 2, daily report at 07:00.</figcaption></figure>
+<figure style="margin-top:14px"><img src="assets/03_tickets_to_people.svg" alt="n8n workflow: every 10 minutes read open tickets, keep new ones, route by reason to mechanic, front desk or exceptions channel"><figcaption>Workflow 3, tickets to the right person.</figcaption></figure>
+</div>
+</div>
+</section>
+
+<section id="gate">
+<div class="k">Case 3 · Agent verification</div>
+<h2>Agents say "done". This checks.</h2>
+<div class="two">
+<div>
+<p>I run projects with several coding agents on one shared state file. The failures that cost me time were rarely wrong answers. They were reports that had run ahead of the workspace: a build that "succeeded" two pages too long, a checklist that kept reverting to an old number, a file named "signed" with no signature in it.</p>
+<p>The gate lets a report state as fact only what a re-runnable check confirms. The agent records each claim in a hash-chained ledger with a check against a file. The gate re-runs every check and reads the report sentence by sentence.</p>
+<ul class="f">
+<li>8 kinds of check; stale evidence is its own verdict</li>
+<li>A report linter for English and Russian</li>
+<li>7 invariants on 300 fuzzed workspaces, one injected fault each</li>
+<li>23 of 23 planted bugs caught; standard library only</li>
+</ul>
+<div class="tags"><span>Python</span><span>hash chain</span><span>fuzzing</span><span>mutation testing</span><span>CI gate</span></div>
+<p><a href="https://github.com/galpetame/agent-claim-gate">github.com/galpetame/agent-claim-gate</a></p>
+</div>
+<div>
+<pre><span class="d">$ python examples/pack/build.py --overflow</span>
+<span class="b">CONTRADICTED</span> C-1  the pack has 83 pages
+             <span class="d">(counted 85, expected 83)</span>
+<span class="b">CONTRADICTED</span> C-2  every page is stamped N/83
+<span class="o">VERIFIED</span>     C-3  the total appears in all six places
+<span class="o">VERIFIED</span>     C-4  79 signature places
+<span class="o">VERIFIED</span>     C-5  no draft marks left
+<span class="o">VERIFIED</span>     C-6  the print checklist matches its source
+<span class="w">UNCHECKED</span>    C-7  printing four sets costs about 700
+             <span class="d">(declared estimated; not checked)</span>
+<span class="b">REPORT</span>       line 3: says 'verified' as fact,
+             but C-1 is contradicted
+<span class="b">GATE FAILED</span></pre>
+<p class="note">While I wrote the tests, they found two holes in the linter itself. One let a hedge in the first half of a sentence excuse a claim in the second: "Not verified by hand, but the upload is done."</p>
+</div>
+</div>
+</section>
+
+<section id="pulse">
+<div class="k">Case 4 · Market data</div>
+<h2>A signal machine that blocks itself until it has earned trust</h2>
+<div class="two">
+<div>
+<p>BTC Pulse reads public exchange data on a fixed cycle, scores a directional hypothesis for BTC and ETH, and routes posts to 11 Slack channels. It has no keys and places no orders. Its job is to say "wait" most of the time and to prove it when it says anything else.</p>
+<p>Every post passes a chain of gates. An action alert stays blocked until the direction has at least 30 activated outcomes and a Wilson interval that supports it. In the screenshot the machine has 17 of 30 and a losing record, so it has blocked itself.</p>
+<ul class="f">
+<li>34 Python modules, about 10,000 lines</li>
+<li>Six router gates on every send: destination, post type, required fields, price within 0.5% of an independent spot quote, idempotency</li>
+<li>Shadow pipeline and replay audits before any policy is promoted</li>
+<li>An anti-lookahead test: shifting features back one bar must make the metrics worse</li>
+</ul>
+<div class="tags"><span>Python</span><span>Bybit public API</span><span>Slack</span><span>SQLite</span><span>Wilson intervals</span><span>shadow mode</span></div>
+</div>
+<div>
+<figure><img src="assets/btc-pulse.png" alt="BTC Pulse Live dashboard: both instruments show WAIT, sample 17 of 30, action alert blocked because the trust sample is below 30 activated outcomes" width="1100" height="670">
+<figcaption>The live dashboard on 3 August 2026. "Action alert: blocked. Trust sample below 30 activated outcomes."</figcaption></figure>
+<div class="tw" style="margin-top:16px"><table>
+<tr><th>Gate</th><th>Blocks a post when</th></tr>
+<tr><td>INV-13</td><td>the symbol or horizon does not match the channel</td></tr>
+<tr><td>INV-15</td><td>the post type is not on the channel's allow list</td></tr>
+<tr><td>INV-22</td><td>an active signal lacks entry, stop, take-profit, confidence or scorer version</td></tr>
+<tr><td>INV-17</td><td>the quoted price is more than 0.5% from an independent spot fetch</td></tr>
+<tr><td>Predictive gate</td><td>the direction has no confirmed track record yet</td></tr>
+</table></div>
+<p class="note">Read-only by design. This is research and alerting, not investment advice or automated trading.</p>
+</div>
+</div>
+</section>
+
+<section id="toys">
+<div class="k">Case 5 · Product and storefront</div>
+<h2>Toy Genesis Lab: a brand, eight characters and a storefront, built with agents</h2>
+<div class="two">
+<div>
+<p>My own product company: collectible toys in a dark, cute aesthetic for adults in the alt, goth and kawaii scenes. Agents run the market research, positioning and competitive analysis on top of a parametric financial model, and generate concept renders that I select and direct.</p>
+<ul class="f">
+<li>Eight characters across three lines, each with a story card</li>
+<li>Storefront on Cloudflare Workers in English and Russian, with a pre-order flow</li>
+<li>Stripe and PayPal checkout wired in sandbox mode</li>
+<li>An authenticity passport designed around an NFC chip in each toy</li>
+</ul>
+<div class="tags"><span>Cloudflare Workers</span><span>Stripe</span><span>PayPal</span><span>3D renders</span><span>EN / RU</span></div>
+<p><a href="https://toy-genesis-lab.toy-genesis-payments.workers.dev">Open the storefront</a></p>
+<p class="note">Status: pre-production. Payments are in sandbox mode and the toys are renders, not manufactured stock.</p>
+</div>
+<figure style="max-width:340px"><img src="assets/lilith.jpg" alt="Render of Lilith, a 12 cm bag-charm character from Toy Genesis Lab" width="460" height="655"><figcaption>Lilith, character 01: a 12 cm bag charm.</figcaption></figure>
+</div>
+</section>
+
+<section id="how">
+<div class="k">How I work</div>
+<h2>Four rules I do not bend</h2>
+<div class="tw"><table>
+<tr><th style="width:32%">Rule</th><th>What it looks like in the work above</th></tr>
+<tr><td>Process first, prompts second</td><td>The voice agent started as a call flow and 18 acceptance checks, not as a prompt.</td></tr>
+<tr><td>The model proposes, code decides</td><td>No model writes to a schedule, a Slack channel or a ledger without passing a gate.</td></tr>
+<tr><td>Facts are checked, estimates are labelled</td><td>Every figure on this page comes from a file, a test run or a screenshot. Prototypes are marked as prototypes.</td></tr>
+<tr><td>A person owns the exceptions</td><td>Unknown outcomes go to a human with a packet that explains what happened and what is half done.</td></tr>
+</table></div>
+<p style="margin-top:22px">Before AI: four years as an economist and project coordinator on municipal tender contracts in Moscow, then a year of installation work at height in Israel. English fluent, Russian native, Hebrew basic. Based in Tel Aviv; open to full-time roles in Israel and to remote B2B contracts.</p>
+</section>
+
+<footer>Tamerlane Galperin · <a href="mailto:galpetame@gmail.com">galpetame@gmail.com</a> · <a href="https://github.com/galpetame">GitHub</a> · <a href="https://www.linkedin.com/in/tamerlane-galperin-30705939b">LinkedIn</a><br>Built with coding agents. Tests, fuzzing and mutation checks are how I know the result is right.</footer>
+</div>
+</body>
+</html>
